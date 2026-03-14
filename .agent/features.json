@@ -1,0 +1,40 @@
+{
+  "project": {
+    "name": "项目名称",
+    "description": "项目描述",
+    "tech_stack": ["框架", "数据库", "测试框架"],
+    "created_at": "YYYY-MM-DD"
+  },
+  "features": [
+    {
+      "id": "F001",
+      "category": "setup",
+      "description": "项目基础结构搭建",
+      "steps": [
+        "创建项目目录结构",
+        "初始化包管理配置",
+        "创建基础配置文件"
+      ],
+      "passes": false,
+      "priority": "critical"
+    },
+    {
+      "id": "F002",
+      "category": "core",
+      "description": "[待填写的功能描述]",
+      "steps": [
+        "验证步骤1",
+        "验证步骤2",
+        "验证步骤3"
+      ],
+      "passes": false,
+      "priority": "high"
+    }
+  ],
+  "statistics": {
+    "total": 2,
+    "passed": 0,
+    "failed": 0,
+    "pending": 2
+  }
+}
