@@ -31,14 +31,14 @@
         "验证步骤2",
         "验证步骤3"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "high"
     }
   ],
   "statistics": {
     "total": 2,
-    "passed": 1,
+    "passed": 2,
     "failed": 0,
-    "pending": 1
+    "pending": 0
   }
 }
