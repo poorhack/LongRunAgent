@@ -95,8 +95,10 @@ log_error() {
 # 获取功能进度
 get_progress() {
     local features_file="$PROJECT_DIR/.agent/features.json"
-    local total=$(grep -c '"id"' "$features_file" 2>/dev/null || echo "0")
-    local completed=$(grep -c '"passes": true' "$features_file" 2>/dev/null || echo "0")
+    local total=$(grep -c '"id"' "$features_file" 2>/dev/null || true)
+    local completed=$(grep -c '"passes": true' "$features_file" 2>/dev/null || true)
+    total=${total:-0}
+    completed=${completed:-0}
     echo "$completed/$total"
 }
 
