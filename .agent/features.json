@@ -2,7 +2,11 @@
   "project": {
     "name": "项目名称",
     "description": "项目描述",
-    "tech_stack": ["框架", "数据库", "测试框架"],
+    "tech_stack": [
+      "框架",
+      "数据库",
+      "测试框架"
+    ],
     "created_at": "YYYY-MM-DD"
   },
   "features": [
@@ -15,7 +19,7 @@
         "初始化包管理配置",
         "创建基础配置文件"
       ],
-      "passes": false,
+      "passes": true,
       "priority": "critical"
     },
     {
@@ -33,8 +37,8 @@
   ],
   "statistics": {
     "total": 2,
-    "passed": 0,
+    "passed": 1,
     "failed": 0,
-    "pending": 2
+    "pending": 1
   }
 }
