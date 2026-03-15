@@ -101,6 +101,111 @@ if [ -f "go.mod" ]; then
     exit 0
 fi
 
+# Java 项目
+if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+    echo "📦 检测到 Java 项目"
+
+    # 检查是否有已编译的 jar 文件
+    jar_file=$(find . -name "*.jar" -type f ! -name "*-sources.jar" ! -name "*-javadoc.jar" 2>/dev/null | head -1)
+    if [ -n "$jar_file" ]; then
+        echo "🚀 运行 jar 文件: $jar_file"
+        java -jar "$jar_file"
+        exit 0
+    fi
+
+    # 检测构建工具
+    if [ -f "pom.xml" ]; then
+        # Maven 项目
+        if ! command -v mvn &> /dev/null; then
+            echo "❌ 未安装 Maven，请先安装"
+            exit 1
+        fi
+
+        echo "📥 下载依赖..."
+        mvn dependency:resolve -q
+
+        echo "🚀 启动开发服务器..."
+        if grep -q "spring-boot" pom.xml 2>/dev/null; then
+            mvn spring-boot:run
+        else
+            mvn compile exec:java -Dexec.mainClass="Main" 2>/dev/null || \
+                echo "⚠️  请指定主类或手动运行"
+        fi
+    else
+        # Gradle 项目
+        if [ -f "gradlew" ]; then
+            chmod +x gradlew
+            echo "📥 下载依赖..."
+            ./gradlew dependencies --quiet
+            echo "🚀 启动开发服务器..."
+            ./gradlew bootRun 2>/dev/null || ./gradlew run
+        elif command -v gradle &> /dev/null; then
+            echo "📥 下载依赖..."
+            gradle dependencies --quiet
+            echo "🚀 启动开发服务器..."
+            gradle bootRun 2>/dev/null || gradle run
+        else
+            echo "❌ 未安装 Gradle，请先安装"
+            exit 1
+        fi
+    fi
+    exit 0
+fi
+
+# C++ 项目
+if [ -f "CMakeLists.txt" ] || [ -f "Makefile" ]; then
+    echo "📦 检测到 C++ 项目"
+
+    if [ -f "CMakeLists.txt" ]; then
+        # CMake 项目
+        if ! command -v cmake &> /dev/null; then
+            echo "❌ 未安装 CMake，请先安装"
+            exit 1
+        fi
+
+        echo "🔨 构建项目..."
+        cmake -B build -S .
+        cmake --build build
+
+        echo "🚀 运行项目..."
+        for name in main app server run; do
+            if [ -f "build/$name" ]; then
+                ./build/$name
+                exit 0
+            fi
+        done
+        exec_file=$(find build -type f -executable ! -name "*.o" ! -name "CMakeCache.txt" 2>/dev/null | head -1)
+        if [ -n "$exec_file" ]; then
+            "$exec_file"
+            exit 0
+        fi
+        echo "⚠️  未找到可执行文件，请手动运行"
+    elif [ -f "Makefile" ]; then
+        # Makefile 项目
+        if ! command -v make &> /dev/null; then
+            echo "❌ 未安装 Make，请先安装"
+            exit 1
+        fi
+
+        echo "🔨 构建项目..."
+        make clean 2>/dev/null || true
+        make
+
+        echo "🚀 运行项目..."
+        if grep -q "^run:" Makefile 2>/dev/null; then
+            make run
+        else
+            exec_file=$(find . -maxdepth 2 -type f -executable ! -name "*.o" ! -name "Makefile" 2>/dev/null | head -1)
+            if [ -n "$exec_file" ]; then
+                "$exec_file"
+                exit 0
+            fi
+            echo "⚠️  未找到可执行文件，请手动运行"
+        fi
+    fi
+    exit 0
+fi
+
 echo "❌ 无法识别项目类型"
 echo "请手动配置 init.sh 脚本"
 exit 1
