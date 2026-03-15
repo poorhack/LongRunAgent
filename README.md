@@ -58,3 +58,7 @@ tests/
 ├── progress.md     # 进度日志
 └── state.json      # 状态快照
 ```
+## 生成的demo仓库
+`https://github.com/poorhack/blog.git`
+## demo网址
+`https://blog-delta-ten-10.vercel.app/`
