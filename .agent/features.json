@@ -40,5 +40,34 @@
     "passed": 2,
     "failed": 0,
     "pending": 0
+  },
+  "integration_tests": [
+    {
+      "id": "IT-001",
+      "name": "项目构建测试",
+      "command": "echo '构建命令示例: npm run build' && true",
+      "description": "验证项目能否正常构建",
+      "critical": true
+    },
+    {
+      "id": "IT-002",
+      "name": "代码风格检查",
+      "command": "echo 'lint 命令示例: npm run lint' && true",
+      "description": "验证代码风格是否符合规范",
+      "critical": false
+    },
+    {
+      "id": "IT-003",
+      "name": "单元测试",
+      "command": "echo '测试命令示例: npm test' && true",
+      "description": "运行所有单元测试",
+      "critical": true
+    }
+  ],
+  "integration_test": {
+    "status": "passed",
+    "executed_at": "2026-03-15T19:49:53.036507",
+    "log_file": "/home/nick/Documents/share/claudecode/agent-template/.agent/logs/test-20260315-194952.log",
+    "summary": "所有测试通过 (3/3)"
   }
 }

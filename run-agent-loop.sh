@@ -10,6 +10,8 @@ set -e
 # 默认值
 ITERATIONS=1
 PROJECT_DIR="."
+SKIP_TEST=false
+ONLY_TEST=false
 
 # 解析命令行参数
 while [[ $# -gt 0 ]]; do
@@ -28,13 +30,25 @@ while [[ $# -gt 0 ]]; do
             echo "选项:"
             echo "  -n, --iterations <次数>   循环执行次数 (默认: 1)"
             echo "  -p, --project <目录>      项目目录 (默认: 当前目录)"
+            echo "  --skip-test               跳过整体测试阶段"
+            echo "  --only-test               仅运行测试（不执行功能开发）"
             echo "  -h, --help                 显示此帮助信息"
             echo ""
             echo "示例:"
             echo "  $0                              # 执行 1 次"
             echo "  $0 -n 5                         # 循环执行 5 次"
             echo "  $0 -n 10 -p /path/to/project    # 指定项目目录，循环 10 次"
+            echo "  $0 --skip-test                  # 跳过最终测试"
+            echo "  $0 --only-test                  # 仅执行测试"
             exit 0
+            ;;
+        --skip-test)
+            SKIP_TEST=true
+            shift
+            ;;
+        --only-test)
+            ONLY_TEST=true
+            shift
             ;;
         *)
             echo "未知参数: $1"
@@ -232,6 +246,91 @@ commit_final() {
     log_success "项目开发完成！最终进度: ${progress}"
 }
 
+# 执行整体测试
+run_integration_tests() {
+    local test_script="$PROJECT_DIR/.agent/run-integration-test.sh"
+
+    if [[ ! -f "$test_script" ]]; then
+        log_warn "未找到测试脚本: $test_script"
+        return 0
+    fi
+
+    log_info "========== 开始执行整体测试 =========="
+
+    if bash "$test_script" -p "$PROJECT_DIR"; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# 更新测试状态到 features.json
+update_test_status() {
+    local status="$1"
+    local features_file="$PROJECT_DIR/.agent/features.json"
+
+    if command -v python3 &>/dev/null; then
+        python3 << PYEOF
+import json
+from datetime import datetime
+
+with open('$features_file', 'r') as f:
+    data = json.load(f)
+
+if 'integration_test' not in data:
+    data['integration_test'] = {}
+
+data['integration_test']['status'] = '$status'
+data['integration_test']['executed_at'] = datetime.now().isoformat()
+
+with open('$features_file', 'w') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+PYEOF
+    elif command -v python &>/dev/null; then
+        python << PYEOF
+import json
+from datetime import datetime
+
+with open('$features_file', 'r') as f:
+    data = json.load(f)
+
+if 'integration_test' not in data:
+    data['integration_test'] = {}
+
+data['integration_test']['status'] = '$status'
+data['integration_test']['executed_at'] = datetime.now().isoformat()
+
+with open('$features_file', 'w') as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+PYEOF
+    fi
+}
+
+# 智能诊断失败原因并尝试修复
+diagnose_and_fix_failures() {
+    local max_attempts=3
+    local attempt=0
+
+    log_info "开始智能诊断和修复流程..."
+
+    while [[ $attempt -lt $max_attempts ]]; do
+        attempt=$((attempt + 1))
+        log_info "诊断尝试 $attempt/$max_attempts"
+
+        # 调用测试脚本的修复模式
+        local test_script="$PROJECT_DIR/.agent/run-integration-test.sh"
+        if bash "$test_script" -p "$PROJECT_DIR" --fix --max-fix-attempts 1; then
+            log_success "修复成功！"
+            return 0
+        fi
+
+        log_warn "修复尝试 $attempt 未成功"
+    done
+
+    log_error "经过 $max_attempts 次尝试后仍无法修复"
+    return 1
+}
+
 # ==================== 主流程 ====================
 
 echo -e "${BLUE}"
@@ -244,6 +343,20 @@ log_info "========== 循环执行脚本启动 =========="
 log_info "项目目录: $PROJECT_DIR"
 log_info "计划循环次数: $ITERATIONS"
 log_info "日志文件: $LOG_FILE"
+
+# 仅测试模式
+if [[ "$ONLY_TEST" == "true" ]]; then
+    log_info "========== 仅测试模式 =========="
+    if run_integration_tests; then
+        update_test_status "passed"
+        log_success "整体测试通过"
+        exit 0
+    else
+        update_test_status "failed"
+        log_error "整体测试失败"
+        exit 1
+    fi
+fi
 
 # 检查是否已完成
 if is_project_complete; then
@@ -263,6 +376,22 @@ for ((i=1; i<=ITERATIONS; i++)); do
     next_feature=$(get_next_feature)
     if [[ -z "$next_feature" ]]; then
         log_success "所有功能已完成！"
+
+        # 执行整体测试（除非跳过）
+        if [[ "$SKIP_TEST" == "true" ]]; then
+            log_info "跳过整体测试（--skip-test）"
+            update_test_status "skipped"
+        else
+            log_info "开始执行整体测试..."
+            if run_integration_tests; then
+                update_test_status "passed"
+                log_success "整体测试通过"
+            else
+                update_test_status "failed"
+                log_error "整体测试失败"
+            fi
+        fi
+
         commit_final "$progress"
         break
     fi
@@ -277,7 +406,7 @@ for ((i=1; i<=ITERATIONS; i++)); do
 
     # 直接运行 claude，允许交互
     # 日志记录通过 tee 在脚本启动时已设置
-    if claude "请继续完成项目的下一个功能。读取 .agent/features.json 了解项目状态，完成 $feature_id: $feature_desc 后更新状态。"; then
+    if claude "请继续完成项目的下一个功能。读取 .agent/features.json 了解项目状态，完成 $feature_id: $feature_desc 后更新状态, 最后通过/exit命令退出claude"; then
         log_success "Claude 执行完成"
 
         # 验证功能是否真正完成（检查是否有实际的代码更改）
@@ -307,6 +436,28 @@ for ((i=1; i<=ITERATIONS; i++)); do
     # 检查是否全部完成
     if is_project_complete; then
         log_success "========== 所有功能已完成 =========="
+
+        # 执行整体测试（除非跳过）
+        if [[ "$SKIP_TEST" == "true" ]]; then
+            log_info "跳过整体测试（--skip-test）"
+            update_test_status "skipped"
+        else
+            log_info "开始执行整体测试..."
+            if run_integration_tests; then
+                update_test_status "passed"
+                log_success "整体测试通过"
+            else
+                update_test_status "failed"
+                log_error "整体测试失败，尝试智能修复..."
+                if diagnose_and_fix_failures; then
+                    update_test_status "passed"
+                    log_success "修复后测试通过"
+                else
+                    log_error "整体测试失败，请手动检查"
+                fi
+            fi
+        fi
+
         commit_final "$progress"
         break
     fi
