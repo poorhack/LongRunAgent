@@ -81,6 +81,7 @@ TEMPLATE_DIR="$(dirname "$0")"
 cp "$TEMPLATE_DIR/.gitignore" "$PROJECT_DIR/"
 cp "$TEMPLATE_DIR/init.sh" "$PROJECT_DIR/"
 cp "$TEMPLATE_DIR/README.md" "$PROJECT_DIR/"
+cp "$TEMPLATE_DIR/run-agent-loop.sh" "$PROJECT_DIR/"
 
 # 创建 features.json
 FEATURES_JSON="$PROJECT_DIR/.agent/features.json"

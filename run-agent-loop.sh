@@ -273,12 +273,26 @@ for ((i=1; i<=ITERATIONS; i++)); do
     log_info "执行 claude 命令..."
     cd "$PROJECT_DIR"
 
-    # 使用 claude --print 模式执行，传入指令
-    if claude --print "请继续完成项目的下一个功能。读取 .agent/features.json 了解项目状态，完成 $feature_id: $feature_desc 后更新状态。" >> "$LOG_FILE" 2>&1; then
+    # 使用 claude 交互式模式执行，让用户看到实时输出
+    # 同时将输出记录到日志文件
+    # 注意：使用 set -o pipefail 确保管道中任何命令失败都会被捕获
+    set -o pipefail
+    if claude "请继续完成项目的下一个功能。读取 .agent/features.json 了解项目状态，完成 $feature_id: $feature_desc 后更新状态。" 2>&1 | tee -a "$LOG_FILE"; then
         log_success "Claude 执行完成"
+
+        # 验证功能是否真正完成（检查是否有实际的代码更改）
+        if [[ -n $(git status --porcelain 2>/dev/null) ]]; then
+            log_info "检测到代码更改，功能可能已完成"
+        else
+            log_info "未检测到代码更改，请确认功能是否完成"
+        fi
     else
-        log_error "Claude 执行出现问题，继续尝试..."
+        log_error "Claude 执行失败，不标记功能为完成"
+        set +o pipefail
+        # 不标记功能完成，继续下一次循环
+        continue
     fi
+    set +o pipefail
 
     # 检查功能是否完成（简单假设每次执行完成一个功能）
     # 实际应用中可以根据 claude 输出判断
