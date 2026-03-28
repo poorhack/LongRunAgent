@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(git init:*)",
+      "Bash(echo:*)",
+      "Bash(./create-project.sh --help)",
+      "Bash(./run-agent-loop.sh --help)",
+      "Bash(./run-agent-loop.sh -p /nonexistent/path 2>&1)",
+      "Bash(./run-agent-loop.sh -p /tmp 2>&1)",
+      "Bash(mkdir:*)",
+      "Bash(PATH=/tmp/mock-bin:$PATH ./run-agent-loop.sh -n 2 -p /tmp/test-agent-project 2>&1)",
+      "Bash(git add:*)",
+      "Bash(PATH=/tmp/mock-bin:$PATH /home/nick/Documents/share/claudecode/blog/agent-template/run-agent-loop.sh -n 2 -p /tmp/test-agent-project 2>&1)",
+      "Bash(cd:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
