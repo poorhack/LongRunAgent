@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-15T19:49:52.995775",
+  "project_dir": "/home/nick/Documents/share/claudecode/agent-template",
+  "summary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "success_rate": 100.0
+  },
+  "tests": [
+    {
+      "id": "IT-001",
+      "name": "项目构建测试",
+      "status": "passed",
+      "duration": 0,
+      "critical": true,
+      "error": ""
+    },
+    {
+      "id": "IT-002",
+      "name": "代码风格检查",
+      "status": "passed",
+      "duration": 0,
+      "critical": false,
+      "error": ""
+    },
+    {
+      "id": "IT-003",
+      "name": "单元测试",
+      "status": "passed",
+      "duration": 0,
+      "critical": true,
+      "error": ""
+    }
+  ]
+}

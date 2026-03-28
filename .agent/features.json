@@ -1,0 +1,102 @@
+{
+  "project": {
+    "name": "项目名称",
+    "description": "项目描述",
+    "tech_stack": [
+      "框架",
+      "数据库",
+      "测试框架"
+    ],
+    "created_at": "YYYY-MM-DD"
+  },
+  "features": [
+    {
+      "id": "F001",
+      "category": "setup",
+      "description": "项目基础结构搭建",
+      "steps": [
+        "创建项目目录结构",
+        "初始化包管理配置",
+        "创建基础配置文件"
+      ],
+      "passes": true,
+      "priority": "critical",
+      "verification_status": "passed",
+      "verification_attempts": 1,
+      "last_verification_at": "2026-03-15T19:49:00",
+      "implementation_worktree": null,
+      "blocked": false,
+      "blocked_reason": null
+    },
+    {
+      "id": "F002",
+      "category": "core",
+      "description": "[待填写的功能描述]",
+      "steps": [
+        "验证步骤1",
+        "验证步骤2",
+        "验证步骤3"
+      ],
+      "passes": true,
+      "priority": "high",
+      "verification_status": "passed",
+      "verification_attempts": 1,
+      "last_verification_at": "2026-03-15T19:50:00",
+      "implementation_worktree": null,
+      "blocked": false,
+      "blocked_reason": null
+    }
+  ],
+  "statistics": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0,
+    "pending": 0,
+    "blocked": 0
+  },
+  "integration_tests": [
+    {
+      "id": "IT-001",
+      "name": "项目构建测试",
+      "command": "echo '构建命令示例: npm run build' && true",
+      "description": "验证项目能否正常构建",
+      "critical": true
+    },
+    {
+      "id": "IT-002",
+      "name": "代码风格检查",
+      "command": "echo 'lint 命令示例: npm run lint' && true",
+      "description": "验证代码风格是否符合规范",
+      "critical": false
+    },
+    {
+      "id": "IT-003",
+      "name": "单元测试",
+      "command": "echo '测试命令示例: npm test' && true",
+      "description": "运行所有单元测试",
+      "critical": true
+    }
+  ],
+  "integration_test": {
+    "status": "passed",
+    "executed_at": "2026-03-15T19:49:53.036507",
+    "log_file": "/home/nick/Documents/share/claudecode/agent-template/.agent/logs/test-20260315-194952.log",
+    "summary": "所有测试通过 (3/3)"
+  },
+  "_schema_doc": {
+    "feature_fields": {
+      "id": "功能唯一标识 (F001, F002...)",
+      "category": "功能类别 (setup/core/auth/api/ui)",
+      "description": "功能描述",
+      "steps": "验证步骤列表",
+      "passes": "是否通过验证",
+      "priority": "优先级 (critical/high/medium/low)",
+      "verification_status": "验证状态 (pending/passed/failed)",
+      "verification_attempts": "验证尝试次数",
+      "last_verification_at": "最后验证时间",
+      "implementation_worktree": "实现时使用的worktree路径",
+      "blocked": "是否被阻止",
+      "blocked_reason": "被阻止的原因"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "verification_history": [],
+  "blocked_features": [],
+  "statistics": {
+    "total_verifications": 0,
+    "passed_verifications": 0,
+    "failed_verifications": 0,
+    "total_fix_attempts": 0,
+    "successful_fixes": 0,
+    "blocked_count": 0
+  },
+  "config": {
+    "max_fix_attempts": 3,
+    "auto_retry_blocked": false
+  },
+  "_description": {
+    "verification_history": "每次验证的详细记录",
+    "blocked_features": "超过最大修复尝试次数的功能列表",
+    "statistics": "验证和修复统计数据",
+    "config": "修复循环配置"
+  },
+  "_schema": {
+    "verification_history_item": {
+      "feature_id": "功能ID",
+      "timestamp": "验证时间",
+      "attempt": "验证尝试次数(1=首次验证, >1=修复后验证)",
+      "status": "passed | failed",
+      "tests_run": "运行的测试列表",
+      "tests_passed": "通过的测试数量",
+      "tests_failed": "失败的测试数量",
+      "error_details": "错误详情",
+      "fix_applied": "如果有修复，记录修复信息"
+    },
+    "blocked_feature": {
+      "feature_id": "功能ID",
+      "reason": "被阻止的原因",
+      "last_error": "最后的错误信息",
+      "total_attempts": "总尝试次数",
+      "timestamp": "被标记时间"
+    }
+  }
+}
