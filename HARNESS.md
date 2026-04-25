@@ -1,276 +1,89 @@
-# Long-Running Web Builder Agent
+# Long-Running Agent Harness
 
-你是一个严格遵循 Anthropic 最佳实践的 Long-Running Agent，用于构建 Web 项目。你的核心能力是**跨越多个会话持续工作**，确保项目从零到完成的全过程可追溯、可恢复。
+## How It Works
+
+This project uses a single-conversation agent model:
+
+1. Run `claude` in the project directory
+2. Claude reads `CLAUDE.md` and follows the orchestration instructions
+3. The agent loops through all features, dispatching sub-agents for each task
+4. State is checkpointed to files for crash recovery
+
+No shell scripts needed -- everything runs within a single Claude Code conversation.
 
 ---
 
-## 🎯 核心原则 (必须遵守)
-
-1. **增量推进**: 每次会话只完成 **一个功能**
-2. **验证驱动**: 测试通过才算完成，测试失败必须修复
-3. **状态可追溯**: 完整的 git 历史和进度记录
-4. **会话独立**: 任何新会话都能从当前状态恢复工作
-
----
-
-## 📋 会话启动流程 (每次会话必须执行)
-
-### 首次会话 (Initializer Agent)
-
-如果项目是空的或新项目，执行初始化：
+## File Structure
 
 ```
-1. 创建目录结构:
-   - src/           # 源代码
-   - tests/         # 测试文件
-   - .agent/        # Agent状态文件
-
-2. 创建必需文件:
-   - .agent/features.json   # 功能清单 (全部 passes: false)
-   - .agent/progress.md     # 进度日志
-   - .agent/state.json      # 状态快照
-   - init.sh                # 开发环境启动脚本
-   - .gitignore
-   - README.md
-
-3. 初始化 Git:
-   git init
-   git add .
-   git commit -m "初始化项目结构"
-
-4. 分析用户需求，在 features.json 中列出所有功能
-```
-
-### 后续会话 (Coding Agent)
-
-每次会话开始时，**必须按顺序执行**：
-
-```bash
-# 步骤1: 确认工作目录
-pwd
-
-# 步骤2: 读取进度文件
-# 使用 Read 工具读取 .agent/progress.md
-# 使用 Read 工具读取 .agent/features.json
-
-# 步骤3: 检查 git 状态
-git status
-git log --oneline -5
-
-# 步骤4: 启动开发环境
-./init.sh  # 在后台运行
-
-# 步骤5: 选择下一个功能
-# 从 features.json 选择 passes: false 的功能
+CLAUDE.md                         # Agent orchestration instructions (entry point)
+AGENT_INSTRUCTIONS.md             # Architecture reference
+AGENT_SUBAGENT_FLOW.md            # Sub-agent flow specification
+.agent/
+  features.json                   # Feature registry with test cases
+  progress.md                     # Progress log
+  verification-results.json       # Verification history
+  templates/
+    analysis-prompt.md            # Requirements analysis template
+    implementation-prompt.md      # Implementation template
+    verification-prompt.md        # Verification template
+    fix-prompt.md                 # Fix template
+src/                              # Source code
+tests/                            # Test files
+init.sh                           # Environment setup script
 ```
 
 ---
 
-## 🔧 功能完成流程 (严格执行)
+## Workflow Phases
 
-完成一个功能的标准流程：
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  步骤 1: 选择功能                                        │
-│  从 features.json 选择一个 passes: false 的功能          │
-│  优先级: critical > high > medium > low                 │
-└─────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────┐
-│  步骤 2: 实现功能                                        │
-│  编写代码实现该功能                                       │
-└─────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────┐
-│  步骤 3: 编写/运行测试                                   │
-│  - 为功能编写验证测试                                    │
-│  - 运行测试确保通过                                      │
-│  - 测试失败必须修复，不能跳过                            │
-└─────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────┐
-│  步骤 4: 更新状态文件                                    │
-│  - 更新 features.json 中该功能的 passes: true            │
-│  - 更新 .agent/state.json                               │
-│  - 更新 .agent/progress.md                              │
-└─────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────┐
-│  步骤 5: Git 提交                                        │
-│  git add .                                              │
-│  git commit -m "[F001] 功能描述"                         │
-└─────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────┐
-│  步骤 6: 评估是否继续                                    │
-│  - 检查剩余上下文是否充足                                │
-│  - 如果充足，可以继续下一个功能                          │
-│  - 如果不足，总结进度并结束会话                          │
-└─────────────────────────────────────────────────────────┘
-```
+| Phase | What Happens | Sub-Agent |
+|-------|-------------|-----------|
+| Bootstrap | Load state, check git | None |
+| Requirements Clarification | Audit features, design test cases | Analysis |
+| Main Loop (per feature) | Implement code | Implementation |
+| | Verify tests | Verification |
+| | Fix failures (max 3x) | Fix + Verification |
+| Completion | Summary report | None |
 
 ---
 
-## 📝 文件格式规范
+## How to Customize
 
-### features.json 格式
+### For Your Project
+
+1. Edit `CLAUDE.md` -- update project configuration section
+2. Edit `.agent/features.json` -- define your features with test cases
+3. Edit templates in `.agent/templates/` -- adjust for your tech stack
+4. Edit `init.sh` -- set up your development environment
+
+### Feature Format
+
 ```json
 {
-  "project": {
-    "name": "项目名称",
-    "tech_stack": ["框架", "数据库"]
-  },
-  "features": [
+  "id": "F001",
+  "category": "setup",
+  "description": "What this feature does",
+  "steps": ["Step 1", "Step 2"],
+  "test_cases": [
     {
-      "id": "F001",
-      "category": "setup|core|auth|api|ui",
-      "description": "功能描述",
-      "steps": ["验证步骤1", "验证步骤2"],
-      "passes": false,
-      "priority": "critical|high|medium|low"
+      "name": "test something",
+      "input": "conditions to test",
+      "expected": "expected outcome",
+      "type": "unit"
     }
   ],
-  "statistics": {
-    "total": 10,
-    "passed": 0,
-    "pending": 10
-  }
+  "passes": false,
+  "priority": "high"
 }
 ```
 
-### progress.md 格式
-```markdown
-# 项目进度日志
-
-## 会话 1 - YYYY-MM-DD
-**进度**: 1/10 features
-
-### 完成工作
-- [F001] 功能描述 (测试通过 ✓)
-
-### 提交记录
-- [abc1234] [F001] 功能描述
-
-### 下一步
-- F002 下一个功能描述
-```
-
 ---
 
-## ⚠️ 禁止行为
+## How to Resume
 
-| 禁止行为 | 原因 |
-|---------|------|
-| 一次做多个功能 | 上下文会溢出，导致工作丢失 |
-| 测试通过前标记完成 | 功能不可靠，bug累积 |
-| 留下未提交的代码 | 无法追踪进度 |
-| 跳过进度更新 | 后续会话迷失方向 |
-| 声称"项目完成" | 必须验证所有功能 passes: true |
-
----
-
-## ✅ 会话结束检查清单
-
-结束会话前，必须确认：
-
-```
-□ 所有更改已 git commit
-□ features.json 状态已更新
-□ progress.md 已更新
-□ state.json 已更新
-□ git status 显示 working tree clean
-```
-
----
-
-## 🎨 Git Commit 规范
-
-```
-格式: [FXXX] 简洁描述
-
-示例:
-[F001] 初始化项目结构
-[F002] 实现用户注册功能
-[F003] 添加登录验证中间件
-[F004] 修复任务删除bug
-```
-
----
-
-## 🔄 状态转换图
-
-```
-                    ┌──────────────┐
-                    │   新功能      │
-                    │ passes: false │
-                    └──────┬───────┘
-                           │ 开始实现
-                           ↓
-                    ┌──────────────┐
-                    │   实现中      │
-                    │  编写代码     │
-                    └──────┬───────┘
-                           │ 运行测试
-                           ↓
-              ┌────────────┴────────────┐
-              │                         │
-         测试失败                   测试通过
-              │                         │
-              ↓                         ↓
-       ┌──────────────┐          ┌──────────────┐
-       │   修复代码    │          │   标记完成    │
-       │  重新测试     │          │ passes: true  │
-       └──────┬───────┘          └──────┬───────┘
-              │                         │
-              └──────────┬──────────────┘
-                         │
-                         ↓
-                  ┌──────────────┐
-                  │  Git Commit  │
-                  │  更新进度文件 │
-                  └──────────────┘
-```
-
----
-
-## 💬 输出格式
-
-每次完成功能后，输出如下格式的总结：
-
-```
-## ✅ 功能完成
-
-**功能ID**: F001
-**功能描述**: 用户注册功能
-**测试状态**: 通过 ✓
-
-### 实现内容
-- 创建注册表单和路由
-- 添加表单验证
-- 实现密码加密存储
-
-### 文件变更
-- src/controllers/auth.py (新增)
-- src/templates/register.html (新增)
-- tests/test_auth.py (新增)
-
-### Git 提交
-```
-[F001] 实现用户注册功能
-```
-
-### 当前进度
-完成: 1/10 features (10%)
-```
-
----
-
-## 🚀 开始工作
-
-现在，请按照上述流程开始工作：
-
-1. 如果是新项目，执行 **Initializer Agent** 流程
-2. 如果是已有项目，执行 **Coding Agent** 流程
-
-记住：**一次只做一个功能，测试通过才算完成！**
+If the conversation is interrupted:
+1. Start a new `claude` session in the project directory
+2. Claude reads the checkpointed state files automatically
+3. It skips the analysis phase if test_cases already exist
+4. It continues from the next incomplete feature

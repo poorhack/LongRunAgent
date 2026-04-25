@@ -1,64 +1,68 @@
-# 项目名称
+# Long-Running Agent Template
 
-> 简短的项目描述
-
----
-
-## 🎯 项目目标
-
-[描述项目要实现的目标]
+A template for building long-running agents that use Claude Code's sub-agent architecture to implement all features in a single conversation.
 
 ---
 
-## 📋 功能清单
+## How It Works
 
-| ID | 功能 | 状态 |
-|----|------|------|
-| F001 | 项目基础结构 | ⏳ |
-| F002 | [功能描述] | ⏳ |
+1. Run `claude` in this directory
+2. Claude reads `CLAUDE.md` and follows the orchestration instructions
+3. The agent:
+   - Analyzes requirements and designs test cases (Analysis sub-agent)
+   - Loops through each feature:
+     - Dispatches Implementation sub-agent (worktree isolation)
+     - Dispatches Verification sub-agent (read-only testing)
+     - Dispatches Fix sub-agents if needed (max 3 attempts)
+   - Reports final summary
 
 ---
 
-## 🚀 快速开始
+## Feature List
+
+| ID | Feature | Status |
+|----|---------|--------|
+| F001 | Project structure | DONE |
+| F002 | Core module | DONE |
+| F003 | Calculator module | PENDING |
+
+---
+
+## Quick Start
 
 ```bash
-# 启动开发环境
-./init.sh
+# Start the agent
+claude
 
-# 运行测试
-npm test  # 或 pytest tests/
+# Or run tests directly
+pytest tests/ -v
 ```
 
 ---
 
-## 🏗️ 技术栈
+## Tech Stack
 
-- 框架: [框架名称]
-- 数据库: [数据库类型]
-- 测试: [测试框架]
+- Language: Python
+- Testing: Pytest
 
 ---
 
-## 📁 项目结构
+## Project Structure
 
 ```
-src/
-├── controllers/    # 控制器
-├── models/         # 数据模型
-├── views/          # 视图模板
-├── static/         # 静态资源
-└── app.py          # 应用入口
-
-tests/
-├── unit/           # 单元测试
-└── e2e/            # 端到端测试
-
+CLAUDE.md                    # Agent orchestration instructions
+AGENT_INSTRUCTIONS.md        # Architecture reference
+AGENT_SUBAGENT_FLOW.md       # Sub-agent flow specification
 .agent/
-├── features.json   # 功能清单
-├── progress.md     # 进度日志
-└── state.json      # 状态快照
+  features.json              # Feature registry with test cases
+  progress.md                # Progress log
+  verification-results.json  # Verification history
+  templates/
+    analysis-prompt.md       # Requirements analysis template
+    implementation-prompt.md # Implementation template
+    verification-prompt.md   # Verification template
+    fix-prompt.md            # Fix template
+src/                         # Source code
+tests/                       # Test files
+init.sh                      # Environment setup
 ```
-## 生成的demo仓库
-`https://github.com/poorhack/blog.git`
-## demo网址
-`https://blog-delta-ten-10.vercel.app/`

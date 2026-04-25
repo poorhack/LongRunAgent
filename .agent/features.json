@@ -1,102 +1,128 @@
 {
   "project": {
-    "name": "项目名称",
-    "description": "项目描述",
-    "tech_stack": [
-      "框架",
-      "数据库",
-      "测试框架"
-    ],
-    "created_at": "YYYY-MM-DD"
+    "name": "Long-Running Agent Demo",
+    "description": "Demo project for single-conversation sub-agent architecture",
+    "tech_stack": ["Python", "Pytest"],
+    "created_at": "2026-04-25"
   },
   "features": [
     {
       "id": "F001",
       "category": "setup",
-      "description": "项目基础结构搭建",
+      "description": "Project structure and configuration",
       "steps": [
-        "创建项目目录结构",
-        "初始化包管理配置",
-        "创建基础配置文件"
+        "Create project directory structure",
+        "Initialize package configuration",
+        "Create base configuration files"
+      ],
+      "test_cases": [
+        {
+          "name": "Directory structure exists",
+          "input": "Check src/ and tests/ directories exist",
+          "expected": "Both directories exist with __init__.py files",
+          "type": "unit"
+        }
       ],
       "passes": true,
       "priority": "critical",
       "verification_status": "passed",
       "verification_attempts": 1,
       "last_verification_at": "2026-03-15T19:49:00",
-      "implementation_worktree": null,
       "blocked": false,
       "blocked_reason": null
     },
     {
       "id": "F002",
       "category": "core",
-      "description": "[待填写的功能描述]",
+      "description": "Core functionality implementation",
       "steps": [
-        "验证步骤1",
-        "验证步骤2",
-        "验证步骤3"
+        "Implement core module",
+        "Add error handling",
+        "Create utility functions"
+      ],
+      "test_cases": [
+        {
+          "name": "Core module imports correctly",
+          "input": "import src modules",
+          "expected": "No import errors",
+          "type": "unit"
+        }
       ],
       "passes": true,
       "priority": "high",
       "verification_status": "passed",
       "verification_attempts": 1,
       "last_verification_at": "2026-03-15T19:50:00",
-      "implementation_worktree": null,
+      "blocked": false,
+      "blocked_reason": null
+    },
+    {
+      "id": "F003",
+      "category": "test",
+      "description": "Python calculator module for testing sub-agent architecture",
+      "steps": [
+        "Create src/calculator.py with add, subtract, multiply, divide functions",
+        "Create tests/test_calculator.py test file",
+        "Run pytest tests/test_calculator.py to verify"
+      ],
+      "test_cases": [
+        {
+          "name": "Add positive numbers",
+          "input": "add(2, 3)",
+          "expected": "5",
+          "type": "unit"
+        },
+        {
+          "name": "Add negative numbers",
+          "input": "add(-2, -3)",
+          "expected": "-5",
+          "type": "unit"
+        },
+        {
+          "name": "Subtract numbers",
+          "input": "subtract(5, 3)",
+          "expected": "2",
+          "type": "unit"
+        },
+        {
+          "name": "Multiply numbers",
+          "input": "multiply(2, 3)",
+          "expected": "6",
+          "type": "unit"
+        },
+        {
+          "name": "Divide numbers",
+          "input": "divide(6, 3)",
+          "expected": "2",
+          "type": "unit"
+        },
+        {
+          "name": "Divide by zero returns None",
+          "input": "divide(5, 0)",
+          "expected": "None",
+          "type": "edge_case"
+        },
+        {
+          "name": "Float arithmetic",
+          "input": "add(2.5, 3.5)",
+          "expected": "6.0",
+          "type": "unit"
+        }
+      ],
+      "passes": false,
+      "priority": "medium",
+      "verification_status": "pending",
+      "verification_attempts": 0,
+      "last_verification_at": null,
       "blocked": false,
       "blocked_reason": null
     }
   ],
   "statistics": {
-    "total": 2,
+    "total": 3,
     "passed": 2,
     "failed": 0,
-    "pending": 0,
+    "pending": 1,
     "blocked": 0
-  },
-  "integration_tests": [
-    {
-      "id": "IT-001",
-      "name": "项目构建测试",
-      "command": "echo '构建命令示例: npm run build' && true",
-      "description": "验证项目能否正常构建",
-      "critical": true
-    },
-    {
-      "id": "IT-002",
-      "name": "代码风格检查",
-      "command": "echo 'lint 命令示例: npm run lint' && true",
-      "description": "验证代码风格是否符合规范",
-      "critical": false
-    },
-    {
-      "id": "IT-003",
-      "name": "单元测试",
-      "command": "echo '测试命令示例: npm test' && true",
-      "description": "运行所有单元测试",
-      "critical": true
-    }
-  ],
-  "integration_test": {
-    "status": "passed",
-    "executed_at": "2026-03-15T19:49:53.036507",
-    "log_file": "/home/nick/Documents/share/claudecode/agent-template/.agent/logs/test-20260315-194952.log",
-    "summary": "所有测试通过 (3/3)"
-  },
-  "_schema_doc": {
-    "feature_fields": {
-      "id": "功能唯一标识 (F001, F002...)",
-      "category": "功能类别 (setup/core/auth/api/ui)",
-      "description": "功能描述",
-      "steps": "验证步骤列表",
-      "passes": "是否通过验证",
-      "priority": "优先级 (critical/high/medium/low)",
-      "verification_status": "验证状态 (pending/passed/failed)",
-      "verification_attempts": "验证尝试次数",
-      "last_verification_at": "最后验证时间",
-      "implementation_worktree": "实现时使用的worktree路径",
-      "blocked": "是否被阻止",
-      "blocked_reason": "被阻止的原因"
-    }
   }
 }

@@ -1,82 +1,65 @@
----
-feature_id: {feature_id}
-attempt: {attempt_number}
----
+# Fix Task
 
-# 功能修复任务
+## Context
 
-## 上下文信息
-
-- **功能 ID**: {feature_id}
-- **修复尝试**: 第 {attempt_number} 次（最多 3 次）
+- **Feature ID**: [FEATURE_ID]
+- **Fix Attempt**: [ATTEMPT_NUMBER] of 3
 
 ---
 
-## 错误详情 ⚠️
-
-以下是验证失败的具体信息：
+## Error Details
 
 ```
-{error_details}
+[ERROR_DETAILS]
 ```
 
 ---
 
-## 失败的测试
+## Failed Tests
 
-| 测试名称 | 错误信息 |
-|---------|---------|
-{tests_failed_table}
-
----
-
-## 修复要求
-
-1. **分析根因**: 理解测试失败的根本原因
-2. **定位问题**: 找到需要修复的代码位置
-3. **修复代码**: 只修改代码逻辑，不要修改测试本身
-4. **验证逻辑**: 确保修复后逻辑正确
+| Test | Error |
+|------|-------|
+| [FAILED_TESTS_TABLE] |
 
 ---
 
-## 禁止事项 ⚠️
+## Your Task
 
-- ❌ **不要修改** `.agent/features.json`
-- ❌ **不要设置** `passes=true`
-- ❌ **不要修改测试用例本身**（测试是正确的，代码可能有错误）
-- ❌ **不要跳过测试**
-- ❌ **不要删除测试文件**
-
----
-
-## 修复原则
-
-- 测试失败通常意味着代码有 bug，不是测试有问题
-- 除非明确确认测试逻辑错误，否则只修复代码
-- 修复应该是最小化的，不要做大范围重构
-- 每次修复只针对当前失败的测试
+1. **Analyze root cause** of the test failures
+2. **Locate the problem** in the source code
+3. **Fix the code** -- make minimal, targeted changes
+4. **Verify logic** -- ensure the fix addresses the root cause
 
 ---
 
-## 返回格式
+## Prohibitions
 
-完成后请返回以下 JSON 格式的摘要：
+- Do NOT modify `.agent/features.json`
+- Do NOT set `passes=true`
+- Do NOT modify test files -- tests define correct behavior
+- Do NOT delete or skip tests
+- Do NOT make unrelated changes
+
+---
+
+## Fix Principles
+
+- Tests fail because code has bugs, not because tests are wrong
+- Make minimal fixes -- do not refactor or redesign
+- Each fix should target the specific failing test(s)
+- If you cannot identify the root cause, return `fix_failed` with your analysis
+
+---
+
+## Return Format
 
 ```json
 {
   "status": "fixed" | "fix_failed",
   "files_modified": ["file1", "file2"],
-  "fix_summary": "修复内容摘要",
-  "root_cause": "问题根因分析",
-  "changes_description": "具体修改说明"
+  "fix_summary": "What was changed and why",
+  "root_cause": "Analysis of why the bug occurred"
 }
 ```
 
----
-
-## 注意事项
-
-- 这是第 {attempt_number} 次修复尝试
-- 如果这次修复仍然失败，功能可能被标记为 blocked
-- 请专注于解决具体的错误，不要进行无关的修改
-- 如果无法确定问题原因，返回 `fix_failed` 并说明分析结果
+If you cannot fix the issue, return `status: "fix_failed"` with a detailed analysis.
